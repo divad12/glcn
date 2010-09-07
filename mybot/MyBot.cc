@@ -89,7 +89,12 @@ vector<int> PwState::fleetsAdjustPlanetShips() {
     } else if (ops == mes) {
       ret[id] = 0;
     } else {
-      ret[id] = it->Owner() == 0 ? ops + mes - planet : ops - mes;
+      if (it->Owner() == 0) {
+        ret[id] = ops + mes - planet;
+        ret[id] *= (mes > ops ? -1 : 1);
+      } else {
+        ret[id] = ops - mes;
+      }
     }
   }
 
@@ -181,7 +186,7 @@ void DoTurn(const PlanetWars& planetWars) {
   // (3) Find the weakest enemy or neutral planet.
   int dest = -1;
   double dest_score = -999999.0;
-  vector<Planet> not_my_planets = planetWars.NotMyPlanets();
+  vector<Planet> not_my_planets = pw.Planets;
   for (int i = 0; i < not_my_planets.size(); ++i) {
     const Planet& p = not_my_planets[i];
     double score = scorePlanet(pw, p);
