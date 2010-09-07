@@ -1,8 +1,8 @@
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 #include "PlanetWars.h"
 using namespace std;
-
 
 
 // Variables starting with capitals denote constants.
@@ -34,13 +34,32 @@ PwState::PwState(const PlanetWars& pw) {
 //------------------------------------------------------------------------------
 // Global Variables
 //------------------------------------------------------------------------------
-
+ofstream fout("debug.txt");
 
 
 
 //------------------------------------------------------------------------------
-// Helper Functions
+// Functions
 //------------------------------------------------------------------------------
+
+
+// Initialize a PlanetWars game
+void initGame() {
+}
+
+// Scores a planet on how desirable it is. The higher, the more desirable.
+// Factors taken into account:
+// - num ships currently on it
+// - growth rate
+// TODO: take into account ownership: if mine, rank it undesirable (negative)
+// TODO: take into account incoming fleets
+// TODO: take into account distance
+double scorePlanet(const Planet& planet) {
+  double numerator = planet.GrowthRate();
+  double denominator = planet.NumShips() * (planet.Owner() == 1 ? -1 : 1);
+
+  return numerator / denominator;
+}
 
 
 // The DoTurn function is where your code goes. The PlanetWars object contains
@@ -57,8 +76,8 @@ void DoTurn(const PlanetWars& planetWars) {
   // Cached pw
   PwState pw(planetWars);
 
-  // (1) Do nothing if our fleets count exceeds our planets count
-  if (pw.MyFleetsSize >= pw.MyPlanetsSize) {
+  // (1) Do nothing if our fleets count exceeds
+  if (pw.MyFleetsSize >= pw.MyPlanetsSize * 2) {
   //if (pw.MyFleetsSize >= 1) {
     return;
   }
@@ -77,18 +96,20 @@ void DoTurn(const PlanetWars& planetWars) {
       source_num_ships = p.NumShips();
     }
   }
+
   // (3) Find the weakest enemy or neutral planet.
   int dest = -1;
   double dest_score = -999999.0;
   vector<Planet> not_my_planets = planetWars.NotMyPlanets();
   for (int i = 0; i < not_my_planets.size(); ++i) {
     const Planet& p = not_my_planets[i];
-    double score = 1.0 / (1 + p.NumShips());
+    double score = scorePlanet(p);
     if (score > dest_score) {
       dest_score = score;
       dest = p.PlanetID();
     }
   }
+
   // (4) Send half the ships from my strongest planet to the weakest
   // planet that I do not own.
   if (source >= 0 && dest >= 0) {
@@ -100,6 +121,7 @@ void DoTurn(const PlanetWars& planetWars) {
 // This is just the main game loop that takes care of communicating with the
 // game engine for you. You don't have to understand or change the code below.
 int main(int argc, char *argv[]) {
+  initGame();
   string current_line;
   string map_data;
   while (true) {
