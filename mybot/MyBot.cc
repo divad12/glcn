@@ -7,6 +7,7 @@ using namespace std;
 #define debug(x) fout << x << endl
 
 // Variables starting with capitals denote constants.
+// TODO: take argument specifying whether we want debug mode
 
 //------------------------------------------------------------------------------
 // Prototypes
