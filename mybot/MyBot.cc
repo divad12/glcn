@@ -8,7 +8,6 @@ using namespace std;
 #define debug(x) if (debugMode) fout << x
 
 // Variables starting with capitals denote constants.
-// TODO: take argument specifying whether we want debug mode
 
 //------------------------------------------------------------------------------
 // Prototypes
@@ -143,11 +142,11 @@ void initGame() {
 
 // Scores a planet on how desirable it is. The higher, the more desirable.
 // Factors taken into account:
-// - num ships currently on it TODO tweak multiplier
-// - growth rate TODO tweak multiplier
+// - num ships currently on it
+// - growth rate
+// - distance
 // TODO: this may be a bad formula. addition instead of multiplication, maybe?
-// TODO: take into account incoming fleets
-// TODO: take into account distance
+// TODO: fiddle with all coefficients etc.
 double scorePlanet(const PwState& pw, const Planet& source, const Planet&
     target) {
   int targetId = target.PlanetID();
