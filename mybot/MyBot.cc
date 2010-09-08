@@ -8,6 +8,7 @@ using namespace std;
 #define debug(x) if (debugMode) fout << x
 
 // Variables starting with capitals denote constants.
+// TODO: git merge into master
 
 //------------------------------------------------------------------------------
 // Prototypes
