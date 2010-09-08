@@ -1,10 +1,11 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
+#include <cstring>
 #include "PlanetWars.h"
 using namespace std;
 
-#define debug(x) fout << x << endl
+#define debug(x) if (debugMode) fout << x
 
 // Variables starting with capitals denote constants.
 // TODO: take argument specifying whether we want debug mode
@@ -16,10 +17,19 @@ void outputIntVector(vector<int>);
 
 
 //------------------------------------------------------------------------------
-// Global Variables
+// Globals
 //------------------------------------------------------------------------------
+
+// Constants ---------------------
+const int MIN_PLANET_SHIPS = 20; // Minimum # of ships that must remain on planet
+
+
+
+// Variables ---------------------
 ofstream fout("debug.txt");
 int planetWarsTurn = 0;
+PlanetWars* gPlanetWars = NULL;
+bool debugMode = false;
 
 
 //------------------------------------------------------------------------------
@@ -84,7 +94,7 @@ vector<int> PwState::fleetsAdjustPlanetShips() {
     int ops = enemiesToPlanet[id] + (it->Owner() > 1 ? it->NumShips() : 0);
     int mes = meToPlanet[id] + (it->Owner() == 1 ? it->NumShips() : 0);
     int planet = (it->Owner() == 0 ? it->NumShips() : 0);
-    fout << " planet id=" << id << " ops=" << ops << " mes=" << mes << " planet=" << planet << endl;
+    //debug(" planet id=" << id << " ops=" << ops << " mes=" << mes << " planet=" << planet << endl);
     if (ops + mes <= planet) {
       ret[id] = planet - ops - mes;
     } else if (ops == mes) {
@@ -112,18 +122,19 @@ vector<int> PwState::fleetsAdjustPlanetShips() {
 // DEBUG FUNCTIONS --------------
 void outputPlanet(const Planet& p) {
   debug("id=" << p.PlanetID() << " own=" << p.Owner() << " #ships=" <<
-      p.NumShips() << " GRate=" << p.GrowthRate());
+      p.NumShips() << " GRate=" << p.GrowthRate() << endl);
 }
 
 void outputIntVector(vector<int> v) {
-#ifdef debug
+  if (!debugMode) {
+    return;
+  }
+
   for (vector<int>::iterator it = v.begin(); it != v.end(); ++it) {
     fout << *it << " ";
   }
   fout << endl;
-#endif
 }
-
 
 
 // Initialize a PlanetWars game
@@ -137,13 +148,38 @@ void initGame() {
 // TODO: this may be a bad formula. addition instead of multiplication, maybe?
 // TODO: take into account incoming fleets
 // TODO: take into account distance
-double scorePlanet(const PwState& pw, const Planet& planet) {
-  double numerator = planet.GrowthRate();// * planet.GrowthRate();
-  double denominator = pw.planetShipsWithFleets[planet.PlanetID()];
+double scorePlanet(const PwState& pw, const Planet& source, const Planet&
+    target) {
+  int targetId = target.PlanetID();
+
+  double numerator = target.GrowthRate();// * target.GrowthRate();
+  double denominator = pw.planetShipsWithFleets[targetId]
+      + gPlanetWars->Distance(source.PlanetID(), targetId);
   // TODO epsilon comparison
   denominator = denominator == 0 ? 1.0 : denominator;
 
   return numerator / denominator;
+}
+
+// Finds a target (enemey, neutral, or own planet) for a planet to send fleets to
+int findTarget(const PwState& pw, const Planet& source) {
+  int dest = -1;
+  double dest_score = -999999.0;
+  vector<Planet> allPlanets = pw.Planets;
+  for (int i = 0; i < allPlanets.size(); ++i) {
+    const Planet& p = allPlanets[i];
+    double score = scorePlanet(pw, source, p);
+    if (score > dest_score) {
+      dest_score = score;
+      dest = p.PlanetID();
+    }
+  }
+
+  if (dest != -1) {
+    outputPlanet(gPlanetWars->GetPlanet(dest));
+    debug("  destScore=" << dest_score << endl);
+  }
+  return dest;
 }
 
 
@@ -157,10 +193,11 @@ double scorePlanet(const PwState& pw, const Planet& planet) {
 // starting point, or you can throw it out entirely and replace it with your
 // own. Check out the tutorials and articles on the contest website at
 // http://www.ai-contest.com/resources.
-void DoTurn(const PlanetWars& planetWars) {
-  debug("\n--- Turn " << ++planetWarsTurn);
+void DoTurn() {
+  debug("\n--- Turn " << ++planetWarsTurn << endl);
 
   // Cached pw
+  const PlanetWars& planetWars = *gPlanetWars;
   PwState pw(planetWars);
 
   // (1) Do nothing if our fleets count exceeds
@@ -169,50 +206,34 @@ void DoTurn(const PlanetWars& planetWars) {
     return;
   }
 
-  // (2) Find my strongest planet.
-  int source = -1;
-  double source_score = -999999.0;
-  int source_num_ships = 0;
-  vector<Planet> my_planets = planetWars.MyPlanets();
-  for (int i = 0; i < my_planets.size(); ++i) {
-    const Planet& p = my_planets[i];
-    double score = (double)p.NumShips();
-    if (score > source_score) {
-      source_score = score;
-      source = p.PlanetID();
-      source_num_ships = p.NumShips();
+  // Attack! Each planet makes its own decision.
+  // TODO: find a good order to loop in. maybe loop in order of strength?
+  vector<Planet> myPlanets = planetWars.MyPlanets();
+  for (vector<Planet>::iterator it = myPlanets.begin(); it != myPlanets.end();
+      ++it) {
+    // Check if we have enough ships to send out a fleet
+    if (it->NumShips() < MIN_PLANET_SHIPS * 2) continue;
+
+    int source = it->PlanetID();
+
+    // Now find a planet and send half of ships from this planet to that.
+    int target = findTarget(pw, *it);
+    if (target >= 0) {
+      int numAttackingShips = it->NumShips() / 2;
+      planetWars.IssueOrder(source, target, numAttackingShips);
+      // Now adjust our planet counters
+      pw.planetShipsWithFleets[source] += numAttackingShips;
+      pw.planetShipsWithFleets[target] -= numAttackingShips;
     }
-  }
-
-  // (3) Find the weakest enemy or neutral planet.
-  int dest = -1;
-  double dest_score = -999999.0;
-  vector<Planet> not_my_planets = pw.Planets;
-  for (int i = 0; i < not_my_planets.size(); ++i) {
-    const Planet& p = not_my_planets[i];
-    double score = scorePlanet(pw, p);
-    if (score > dest_score) {
-      dest_score = score;
-      dest = p.PlanetID();
-    }
-  }
-
-  if (dest != -1) {
-    outputPlanet(planetWars.GetPlanet(dest));
-    debug("  destScore=" << dest_score);
-  }
-
-  // (4) Send half the ships from my strongest planet to the weakest
-  // planet that I do not own.
-  if (source >= 0 && dest >= 0) {
-    int num_ships = source_num_ships / 2;
-    planetWars.IssueOrder(source, dest, num_ships);
   }
 }
 
 // This is just the main game loop that takes care of communicating with the
 // game engine for you. You don't have to understand or change the code below.
 int main(int argc, char *argv[]) {
+  if (argc == 2 && strcmp(argv[1], "debug") == 0) {
+    debugMode = true;
+  }
   initGame();
   string current_line;
   string map_data;
@@ -223,7 +244,8 @@ int main(int argc, char *argv[]) {
       if (current_line.length() >= 2 && current_line.substr(0, 2) == "go") {
         PlanetWars pw(map_data);
         map_data = "";
-        DoTurn(pw);
+        gPlanetWars = &pw;
+        DoTurn();
         pw.FinishTurn();
       } else {
         map_data += current_line;
