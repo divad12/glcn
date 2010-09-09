@@ -1,11 +1,14 @@
 #!/bin/bash
 
+mybot=$1
+shift
+
 for file in "$@"
 do
     player_1_counter=0
     player_2_counter=0
     player_2_turn_counter=0
-    echo "Bot: $file"
+    echo "Bot: $file" 1>&2
     for i in {1..100}
     do
         echo -n "M$i" 1>&2
@@ -15,7 +18,7 @@ do
             cmd="java -jar $file"
         fi
 
-        RES=`java -jar tools/PlayGame2.jar maps/map$i.txt 500 500 log.txt "$cmd" "mybot/MyBot" 2>&1 |
+        RES=`java -jar tools/PlayGame2.jar maps/map$i.txt 500 500 log.txt "$cmd" "$mybot" 2>&1 |
                  tail -n 3 | egrep "^Turn|^Player"`
 
         TURN=`echo $RES | sed 's/Turn \([0-9]*\) .*/\1/g'`
