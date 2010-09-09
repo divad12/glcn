@@ -8,7 +8,7 @@ do
     echo "Bot: $file"
     for i in {1..100}
     do
-        echo -n "M$i"
+        echo -n "M$i" 1>&2
 
         cmd=$file
         if [[ "$file" =~ .*\.jar$ ]]; then
@@ -22,12 +22,12 @@ do
         RES2=`echo $RES | grep 'Player [0-9] Wins!'`
         if [ "$RES2" = "Player 1 Wins!" ] ; then
             player_1_counter=`expr $player_1_counter + 1`
-            echo -n '-LOST!'
+            echo -n '-LOST!' 1>&2
         else
             player_2_counter=`expr $player_2_counter + 1`
             player_2_turn_counter=`expr $player_2_turn_counter + $TURN`
         fi
-        echo -n "-$TURN "
+        echo -n "-$TURN " 1>&2
 
     done
     player_2_turn_counter=`expr $player_2_turn_counter / 100`

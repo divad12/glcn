@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <fstream>
 #include <cstring>
+#include <cmath>
+#include <iomanip>
 #include "PlanetWars.h"
 using namespace std;
 
@@ -130,8 +132,15 @@ void outputIntVector(vector<int> v) {
     return;
   }
 
+  // print indices (should line up with values)
+  for (int i = 0; i < v.size(); ++i) {
+    fout << setw(4) << left << i;
+  }
+  fout << endl;
+
+  // print values
   for (vector<int>::iterator it = v.begin(); it != v.end(); ++it) {
-    fout << *it << " ";
+    fout << setw(4) << left << *it;
   }
   fout << endl;
 }
@@ -151,6 +160,12 @@ void initGame() {
 double scorePlanet(const PwState& pw, const Planet& source, const Planet&
     target) {
   int targetId = target.PlanetID();
+
+  // If the planet already (or will) belong to us, don't consider reinforcing it
+  // TODO: experiment with changing the '0' constant to, say, -20
+  if (pw.planetShipsWithFleets[targetId] < 0) {
+    return pw.planetShipsWithFleets[targetId];
+  }
 
   double numerator = target.GrowthRate();// * target.GrowthRate();
   double denominator = pw.planetShipsWithFleets[targetId]
@@ -201,6 +216,7 @@ void DoTurn() {
   PwState pw(planetWars);
 
   // (1) Do nothing if our fleets count exceeds
+  // TODO: huh? why should this even be necessary? play with the constant here
   if (pw.MyFleetsSize >= pw.MyPlanetsSize * 2) {
   //if (pw.MyFleetsSize >= 1) {
     return;
@@ -208,6 +224,7 @@ void DoTurn() {
 
   // Attack! Each planet makes its own decision.
   // TODO: find a good order to loop in. maybe loop in order of strength?
+  //     or, loop in proximity order to first target planet
   vector<Planet> myPlanets = planetWars.MyPlanets();
   for (vector<Planet>::iterator it = myPlanets.begin(); it != myPlanets.end();
       ++it) {
@@ -220,7 +237,21 @@ void DoTurn() {
     int target = findTarget(pw, *it);
     if (target >= 0) {
       int numAttackingShips = it->NumShips() / 2;
+
+      // If after sending out this fleet, we lose this planet, don't attack!
+      if (fabs(pw.planetShipsWithFleets[source]) - numAttackingShips < 0) {
+        continue;
+      }
+
+      // If attacking a neutral and it won't fall, don't attack.
+      // TODO: this should be revised to consider consolidated attacks, future
+      // fleets that will be sent out this turn, etc.
+//      if (gPlanetWars->GetPlanet(target).Owner() == 0 && pw.planetShipsWithFleets[target] - numAttackingShips >= 0) {
+//        continue;
+//      }
+
       planetWars.IssueOrder(source, target, numAttackingShips);
+      debug(source << " attacks " << target << " with " << numAttackingShips << " out of " << it->NumShips() << endl);
       // Now adjust our planet counters
       pw.planetShipsWithFleets[source] += numAttackingShips;
       pw.planetShipsWithFleets[target] -= numAttackingShips;
