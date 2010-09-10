@@ -1,0 +1,6 @@
+example_bots/BullyBot.jar : 100/100, avg turns: 163
+example_bots/DualBot.jar : 100/100, avg turns: 193
+example_bots/ProspectorBot.jar : 100/100, avg turns: 164
+example_bots/RageBot.jar : 100/100, avg turns: 93
+example_bots/RandomBot.jar : 100/100, avg turns: 113
+../3/MyBot : 100/100, avg turns: 66
