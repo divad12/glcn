@@ -1,6 +1,15 @@
-example_bots/BullyBot.jar : 100/100, avg turns: 163
-example_bots/DualBot.jar : 100/100, avg turns: 193
-example_bots/ProspectorBot.jar : 100/100, avg turns: 164
-example_bots/RageBot.jar : 100/100, avg turns: 93
-example_bots/RandomBot.jar : 100/100, avg turns: 113
-../3/MyBot : 100/100, avg turns: 66
+Fri Sep 10 18:50:45 EDT 2010
+mybot/MyBot vs
+    ../bots/2/MyBot: 80 - 4 - 16, avg turns: 119
+    ../bots/3/MyBot: 68 - 5 - 27, avg turns: 147
+    example_bots/BullyBot.jar: 95 - 0 - 5, avg turns: 129
+    example_bots/DualBot.jar: 65 - 0 - 35, avg turns: 118
+    example_bots/ProspectorBot.jar: 94 - 0 - 6, avg turns: 138
+    example_bots/RageBot.jar: 54 - 0 - 46, avg turns: 98
+../bots/3/MyBot vs
+    ../bots/2/MyBot: 72 - 4 - 24, avg turns: 126
+    example_bots/BullyBot.jar: 82 - 0 - 18, avg turns: 241
+    example_bots/DualBot.jar: 45 - 0 - 55, avg turns: 129
+    example_bots/ProspectorBot.jar: 60 - 0 - 40, avg turns: 259
+    example_bots/RageBot.jar: 25 - 0 - 75, avg turns: 141
+

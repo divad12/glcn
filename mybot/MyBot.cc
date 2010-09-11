@@ -10,7 +10,6 @@ using namespace std;
 #define debug(x) if (debugMode) fout << x
 
 // Variables starting with capitals denote constants.
-// TODO: git merge into master
 
 //------------------------------------------------------------------------------
 // Prototypes
@@ -209,7 +208,14 @@ int findTarget(const PwState& pw, const Planet& source) {
 // own. Check out the tutorials and articles on the contest website at
 // http://www.ai-contest.com/resources.
 void DoTurn() {
-  debug("\n--- Turn " << ++planetWarsTurn << endl);
+  planetWarsTurn++;
+  // Do nothing for the first turn to see what enemy does?
+  // TODO: if this works, extend so that we don't do anything until enemy first
+  // sends fleet
+  if (planetWarsTurn == 1) {
+    //return;
+  }
+  debug("\n--- Turn " << planetWarsTurn << endl);
 
   // Cached pw
   const PlanetWars& planetWars = *gPlanetWars;
