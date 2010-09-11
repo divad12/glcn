@@ -15,7 +15,7 @@ mybot/MyBot vs
     example_bots/RageBot.jar: 25 - 0 - 75, avg turns: 141
 
 Fri Sep 10 22:25:16 EDT 2010
-../bots/5/MyBot vs
+../bots/4-no-fleets-limit/MyBot vs
     ../bots/4/MyBot: 60 - 8 - 32, avg turns: 196
     ../bots/3/MyBot: 79 - 1 - 20, avg turns: 134
     example_bots/BullyBot.jar: 98 - 0 - 2, avg turns: 117
