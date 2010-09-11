@@ -72,55 +72,6 @@ class PwState {
 void outputIntVector(vector<int>);
 
 
-//// TODO actually do proper simulation: turn-by-turn simulation, growth rates,
-//// etc.
-//vector<int> PwState::factorInAllFleets() {
-//  //vector <vector<Fleet*> > planetAttackers;
-//  //planetAttackers.resize(NumPlanets + 10);
-//  vector <int> enemiesToPlanet;
-//  enemiesToPlanet.resize(NumPlanets + 2, 0);
-//  vector <int> meToPlanet;
-//  meToPlanet.resize(NumPlanets + 2, 0);
-//  vector <int> ret;
-//  ret.resize(NumPlanets + 2, 0);
-//
-//  // Distribute fleets to their respective targets
-//  for (vector<Fleet>::iterator it = Fleets.begin(); it != Fleets.end(); ++it) {
-//    if (it->Owner() == 1) {
-//      meToPlanet[it->DestinationPlanet()] += it->NumShips();
-//    } else {
-//      enemiesToPlanet[it->DestinationPlanet()] += it->NumShips();
-//    }
-//  }
-//
-//  // Now calculate adjusted num ships for each planet
-//  for (vector<Planet>::iterator it = Planets.begin(); it != Planets.end();
-//      ++it) {
-//    int id = it->PlanetID();
-//    int ops = enemiesToPlanet[id] + (it->Owner() > 1 ? it->NumShips() : 0);
-//    int mes = meToPlanet[id] + (it->Owner() == 1 ? it->NumShips() : 0);
-//    int planet = (it->Owner() == 0 ? it->NumShips() : 0);
-//    //debug(" planet id=" << id << " ops=" << ops << " mes=" << mes << " planet=" << planet << endl);
-//    if (ops + mes <= planet) {
-//      ret[id] = planet - ops - mes;
-//    } else if (ops == mes) {
-//      ret[id] = 0;
-//    } else {
-//      if (it->Owner() == 0) {
-//        ret[id] = ops + mes - planet;
-//        ret[id] *= (mes > ops ? -1 : 1);
-//      } else {
-//        ret[id] = ops - mes;
-//      }
-//    }
-//  }
-//
-//  outputIntVector(ret);
-//  return ret;
-//}
-
-
-
 //------------------------------------------------------------------------------
 // DEBUG FUNCTIONS
 //------------------------------------------------------------------------------
@@ -136,15 +87,15 @@ void outputIntVector(vector<int> v) {
 
   // print indices (should line up with values)
   for (int i = 0; i < v.size(); ++i) {
-    fout << setw(4) << left << i;
+    debug ( setw(4) << left << i);
   }
-  fout << endl;
+  debug ( endl);
 
   // print values
   for (vector<int>::iterator it = v.begin(); it != v.end(); ++it) {
-    fout << setw(4) << left << *it;
+    debug ( setw(4) << left << *it);
   }
-  fout << endl;
+  debug ( endl);
 }
 
 //------------------------------------------------------------------------------
@@ -254,7 +205,7 @@ int PwState::adjustPlanetShips(const IncomingFleets& fleets,
     }
 
     // Battle!
-    fout << " resolving battle: ops =" << ops << " mes="<<mes<<"neus="<<neutrals<<endl;
+    debug ( " resolving battle: ops =" << ops << " mes="<<mes<<"neus="<<neutrals<<endl);
     planetOwner = resolveBattle(ops, mes, neutrals, planetOwner);
     if (it != fleets.end()) {
       lastBattleTurn = (**prevFleet).TurnsRemaining();
@@ -429,66 +380,66 @@ int main(int argc, char *argv[]) {
 
 void testResolveBattle() {
   int a = 20, b = 20, c = 20;
-  fout << " a = " << &a << " b = " << &b  << " c = " << &c << " \n";
+  debug ( " a = " << &a << " b = " << &b  << " c = " << &c << " \n");
   int* victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
   a = 3, b = 2, c = 1;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
   a = 2, b = 2, c = 1;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
 
   a = 2, b = 4, c = 0;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
 
   a = 4, b = 2, c = 0;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
   a = 2, b = 2, c = 7;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
   a = 2, b = 1, c = 7;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
   a = 2, b = 0, c = 7;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
   a = 7, b = 0, c = 2;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
   a = 0, b = 0, c = 7;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
   a = 2, b = 0, c = 0;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 
   a = 2, b = 2, c = 7;
-  fout << " a = " << a << " b = " << b  << " c = " << c << " \n";
+  debug ( " a = " << a << " b = " << b  << " c = " << c << " \n");
   victor = resolveBattle(a, b, c, &c);
-  fout << "winner:" << victor << " = " << *victor << endl;
+  debug ( "winner:" << victor << " = " << *victor << endl);
 }
 
 // TODO: change call since adjustPlanetShips now a method of PwState
@@ -496,7 +447,7 @@ void testAdjustPlanetShips() {
 //  IncomingFleets fleets;
 //  int pid = 0;
 //  const Planet& p = gPlanetWars->GetPlanet(pid);
-//  fout << "planet owner=" << p.Owner() << "ships=" <<  p.NumShips() << endl;
+//  debug ( "planet owner=" << p.Owner() << "ships=" <<  p.NumShips() << endl);
 //
 //  // this is to remove compiler warning
 //  Fleet f = Fleet (1 /*owner*/, 86 /*#ships*/, 1,pid,4, 1 /*turns*/);
@@ -505,7 +456,7 @@ void testAdjustPlanetShips() {
 //  fleets.insert(&f);
 //  f = Fleet (1 /*owner*/, 3 /*#ships*/, 1,pid,4, 1 /*turns*/);
 //  fleets.insert(&f);
-//  fout << adjustPlanetShips(fleets, p);
+//  debug ( adjustPlanetShips(fleets, p));
 }
 
 // Ghetto unit testing - unit test right within the main file! no need to mock
@@ -513,7 +464,7 @@ void testAdjustPlanetShips() {
 void unitTest() {
   //testResolveBattle();
   testAdjustPlanetShips();
-  fout << "\n\n\n---- END DEBUG FILE ----------------\n\n";
+  debug ( "\n\n\n---- END DEBUG FILE ----------------\n\n");
   exit(0);
 }
 
