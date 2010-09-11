@@ -1,4 +1,4 @@
-CC=g++ -Wall
+CC=g++ -Wall -Wextra
 
 all: MyBot
 
