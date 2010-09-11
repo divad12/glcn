@@ -221,12 +221,10 @@ void DoTurn() {
   const PlanetWars& planetWars = *gPlanetWars;
   PwState pw(planetWars);
 
-  // (1) Do nothing if our fleets count exceeds
-  // TODO: huh? why should this even be necessary? play with the constant here
-  if (pw.MyFleetsSize >= pw.MyPlanetsSize * 2) {
-  //if (pw.MyFleetsSize >= 1) {
-    return;
-  }
+//  // TODO: huh? why should this even be necessary? play with the constant here
+//  if (pw.MyFleetsSize >= pw.MyPlanetsSize * 2) {
+//    return;
+//  }
 
   // Attack! Each planet makes its own decision.
   // TODO: find a good order to loop in. maybe loop in order of strength?

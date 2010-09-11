@@ -16,7 +16,7 @@ do
     draws_counter=0
     player_2_turn_counter=0
     echo "Bot: $file" 1>&2
-    for i in {1..$maps}
+    for i in {1..100}
     do
         echo -n "M$i" 1>&2
 
