@@ -12,11 +12,6 @@ using namespace std;
 #define debug(x) if (debugMode) fout << x
 
 // Variables starting with capitals denote constants.
-// TODO: some clean-up
-// TODO: write auto-branch/make bot folder script
-//     - which should remove debugging code
-//     - and create .zip file for upload
-//     - and remove any secret weapons
 
 //------------------------------------------------------------------------------
 // Globals
@@ -310,7 +305,12 @@ bool findAndEngageTarget(PwState& pw, const Planet& source) {
   // - should take into account enemy growth rate
   // - why 1/2? have a smarter default
   int halfForce = (source.NumShips() - pw.shipsLeaving[sourceId]) / 2;
-  int numAttackingShips = min(pw.planetsAdjusted[targetId] + 1, halfForce);
+  int numAttackingShips;
+  if (target.Owner() == 0) {
+    numAttackingShips = min(pw.planetsAdjusted[targetId] + 1, halfForce);
+  } else {
+    numAttackingShips = halfForce;
+  }
 
   if (numAttackingShips <= 0) {
     return false;
