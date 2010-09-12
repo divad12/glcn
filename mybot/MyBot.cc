@@ -23,7 +23,7 @@ const int MIN_PLANET_SHIPS = 20; // Minimum # of ships that must remain on plane
 
 
 // Variables ---------------------
-ofstream fout("debug.txt");
+ofstream fout("debug2.txt");
 int planetWarsTurn = 0;
 PlanetWars* gPlanetWars = NULL;
 bool debugMode = false;
@@ -80,16 +80,18 @@ void outputPlanet(const Planet& p) {
       p.NumShips() << " GRate=" << p.GrowthRate() << endl);
 }
 
-void outputIntVector(vector<int> v) {
+void outputIntVector(vector<int> v, bool printIndices=false) {
   if (!debugMode) {
     return;
   }
 
-  // print indices (should line up with values)
-  for (int i = 0; i < v.size(); ++i) {
-    debug ( setw(4) << left << i);
+  if (printIndices) {
+    // print indices (should line up with values)
+    for (int i = 0; i < v.size(); ++i) {
+      debug ( setw(4) << left << i);
+    }
+    debug (" <-- indices" << endl);
   }
-  debug ( endl);
 
   // print values
   for (vector<int>::iterator it = v.begin(); it != v.end(); ++it) {
@@ -124,11 +126,13 @@ void PwState::factorInAllFleets() {
   // Now calculate adjusted num ships for each planet
   for (vector<Planet>::iterator it = Planets.begin(); it != Planets.end();
       ++it) {
+    debug(setw(4) << left << it->NumShips());
     int pid = it->PlanetID();
     planetsAdjusted[pid] = adjustPlanetShips(fleetsToPlanet[pid], *it);
   }
 
-  outputIntVector(planetsAdjusted);
+  debug(" <-- #ships currently" << endl);
+  outputIntVector(planetsAdjusted, true);
 }
 
 
@@ -203,7 +207,7 @@ int PwState::adjustPlanetShips(const IncomingFleets& fleets,
     }
 
     // Battle!
-    debug ( " resolving battle: ops =" << ops << " mes="<<mes<<"neus="<<neutrals<<endl);
+    //debug ( " resolving battle: ops =" << ops << " mes="<<mes<<"neus="<<neutrals<<endl);
     planetOwner = resolveBattle(ops, mes, neutrals, planetOwner);
     if (it != fleets.end()) {
       lastBattleTurn = (**prevFleet).TurnsRemaining();
@@ -280,6 +284,55 @@ int findTarget(const PwState& pw, const Planet& source) {
   return dest;
 }
 
+// TODO: write .NumShips() function: takes into acount shipsLeaving
+
+// Returns whether we've attacked a target
+bool findAndEngageTarget(PwState& pw, const Planet& source) {
+  int sourceId = source.PlanetID();
+  // Check if we have enough ships to send out a fleet
+  if (source.NumShips() - pw.shipsLeaving[sourceId] < MIN_PLANET_SHIPS * 2) {
+    return false;
+  }
+
+  int targetId = findTarget(pw, source);
+  const Planet& target = gPlanetWars->GetPlanet(targetId);
+  if (targetId < 0) {
+    return false;
+  }
+
+  // TODO: This here fleet size selection should be A LOT more sophisticated.
+  // - should be different against enemies than neutrals
+  // - should take into account enemy growth rate
+  // - why 1/2? have a smarter default
+  int halfForce = (source.NumShips() - pw.shipsLeaving[sourceId]) / 2;
+  int numAttackingShips;
+  if (target.Owner() == 0) {
+    numAttackingShips = min(pw.planetsAdjusted[targetId] + 1, halfForce);
+  } else {
+    numAttackingShips = halfForce;
+  }
+
+  if (numAttackingShips <= 0) {
+    return false;
+  }
+
+  // If after sending out this fleet, we lose this planet, don't attack!
+  // TODO: this could be a little more sophisticated/generalized
+  if (pw.planetsAdjusted[sourceId] + numAttackingShips >= 0) {
+    return false;
+  }
+
+  // If attacking a neutral and it won't fall, don't attack.
+  // TODO: this should be revised to consider consolidated attacks, future
+  // fleets that will be sent out this turn, etc.
+//      if (gPlanetWars->GetPlanet(targetId).Owner() == 0 && pw.planetsAdjusted[targetId] - numAttackingShips >= 0) {
+//        continue;
+//      }
+
+  // Now find a planet and maybe send half of ships from this planet to that.
+  issueOrder(pw, sourceId, targetId, numAttackingShips);
+  return true;
+}
 
 // This function is where your code goes. The PlanetWars object contains
 // the state of the game, including information about all planets and fleets
@@ -307,9 +360,10 @@ void DoTurn() {
   PwState pw(planetWars);
 
   // TODO: huh? why should this even be necessary? play with the constant here
-  // This is sometimes helpful and sometimes not. A little more helpful than
-  // not. Vary this according to our sjjtrength and turn #.
-  if (pw.MyFleetsSize >= pw.MyPlanetsSize * 2) {
+  // This is sometimes helpful and sometimes not. A little less helpful than
+  // not. Vary this according to our sjjtrength and turn #. Also consider
+  // sending out simultaneous fleets at the beginning.
+  if (pw.MyFleetsSize >= pw.MyPlanetsSize * 2 && planetWarsTurn > 10) {
     return;
   }
 
@@ -319,31 +373,9 @@ void DoTurn() {
   vector<Planet> myPlanets = planetWars.MyPlanets();
   for (vector<Planet>::iterator it = myPlanets.begin(); it != myPlanets.end();
       ++it) {
-    // Check if we have enough ships to send out a fleet
-    if (it->NumShips() < MIN_PLANET_SHIPS * 2) continue;
-
-    int source = it->PlanetID();
-
-    // Now find a planet and maybe send half of ships from this planet to that.
-    int target = findTarget(pw, *it);
-    if (target >= 0) {
-      int numAttackingShips = it->NumShips() / 2;
-
-      // If after sending out this fleet, we lose this planet, don't attack!
-      // TODO: this could be a little more sophisticated/generalized
-      if (pw.planetsAdjusted[source] + numAttackingShips >= 0) {
-        continue;
-      }
-
-      // If attacking a neutral and it won't fall, don't attack.
-      // TODO: this should be revised to consider consolidated attacks, future
-      // fleets that will be sent out this turn, etc.
-//      if (gPlanetWars->GetPlanet(target).Owner() == 0 && pw.planetsAdjusted[target] - numAttackingShips >= 0) {
-//        continue;
-//      }
-
-      issueOrder(pw, source, target, numAttackingShips);
-    }
+    do {
+      findAndEngageTarget(pw, *it);
+    } while (0);
   }
 }
 
