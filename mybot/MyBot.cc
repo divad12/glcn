@@ -63,7 +63,7 @@ class PwState {
   vector <int> shipsLeaving;
   int adjustPlanetShips(const IncomingFleets&, const Planet&);
  private:
-  vector<int> factorInAllFleets();
+  void factorInAllFleets();
 };
 
 //------------------------------------------------------------------------------
@@ -111,26 +111,24 @@ PwState::PwState(const PlanetWars& pw) {
   NumPlanets = pw.NumPlanets();
   fleetsToPlanet.resize(NumPlanets + 2);
   shipsLeaving.resize(NumPlanets + 2, 0);
-  planetsAdjusted = factorInAllFleets();
+  planetsAdjusted.resize(NumPlanets + 2);
+  factorInAllFleets();
 }
 
-vector<int> PwState::factorInAllFleets() {
+void PwState::factorInAllFleets() {
   // Distribute fleets to their respective target planets
   for (vector<Fleet>::iterator it = Fleets.begin(); it != Fleets.end(); ++it) {
     fleetsToPlanet[it->DestinationPlanet()].insert(&(*it));
   }
 
   // Now calculate adjusted num ships for each planet
-  vector <int> ret;
-  ret.resize(NumPlanets + 2, 0);
   for (vector<Planet>::iterator it = Planets.begin(); it != Planets.end();
       ++it) {
     int pid = it->PlanetID();
-    ret[pid] = adjustPlanetShips(fleetsToPlanet[pid], *it);
+    planetsAdjusted[pid] = adjustPlanetShips(fleetsToPlanet[pid], *it);
   }
 
-  outputIntVector(ret);
-  return ret;
+  outputIntVector(planetsAdjusted);
 }
 
 
@@ -296,6 +294,7 @@ int findTarget(const PwState& pw, const Planet& source) {
 void DoTurn() {
   planetWarsTurn++;
   // Do nothing for the first turn to see what enemy does?
+  // This is OK, probably an improvement
   // TODO: if this works, extend so that we don't do anything until enemy first
   // sends fleet
   if (planetWarsTurn == 1) {
@@ -308,6 +307,8 @@ void DoTurn() {
   PwState pw(planetWars);
 
   // TODO: huh? why should this even be necessary? play with the constant here
+  // This is sometimes helpful and sometimes not. A little more helpful than
+  // not. Vary this according to our sjjtrength and turn #.
   if (pw.MyFleetsSize >= pw.MyPlanetsSize * 2) {
     return;
   }
@@ -329,7 +330,8 @@ void DoTurn() {
       int numAttackingShips = it->NumShips() / 2;
 
       // If after sending out this fleet, we lose this planet, don't attack!
-      if (fabs(pw.planetsAdjusted[source]) - numAttackingShips < 0) {
+      // TODO: this could be a little more sophisticated/generalized
+      if (pw.planetsAdjusted[source] + numAttackingShips >= 0) {
         continue;
       }
 
