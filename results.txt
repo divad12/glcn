@@ -122,3 +122,27 @@ Sat Sep 11 22:44:03 EDT 2010
     example_bots/RageBot.jar: 93 - 0 - 7, avg turns: 57
     totals: 541 - 45 - 214
 
+Sat Sep 11 23:05:08 EDT 2010
+../bots/7/MyBot vs
+    ../bots/7-frugally-take-ops/MyBot: 76 - 5 - 19, avg turns: 107
+    ../bots/6/MyBot: 62 - 1 - 37, avg turns: 92
+    ../bots/5/MyBot: 62 - 1 - 37, avg turns: 93
+    ../bots/5-skip-first-turn/MyBot: 57 - 0 - 43, avg turns: 93
+    ../bots/5-unlimited-fleets/MyBot: 53 - 2 - 45, avg turns: 93
+    ../bots/4-no-fleets-limit/MyBot: 78 - 0 - 22, avg turns: 91
+    ../bots/3/MyBot: 83 - 0 - 17, avg turns: 91
+    example_bots/DualBot.jar: 97 - 0 - 3, avg turns: 103
+    example_bots/RageBot.jar: 99 - 0 - 1, avg turns: 44
+    totals: 667 - 9 - 224
+../bots/7-frugally-take-ops/MyBot vs
+    ../bots/7/MyBot: 20 - 5 - 75, avg turns: 128
+    ../bots/6/MyBot: 55 - 0 - 45, avg turns: 97
+    ../bots/5/MyBot: 60 - 0 - 40, avg turns: 102
+    ../bots/5-skip-first-turn/MyBot: 48 - 0 - 52, avg turns: 99
+    ../bots/5-unlimited-fleets/MyBot: 49 - 1 - 50, avg turns: 99
+    ../bots/4-no-fleets-limit/MyBot: 75 - 0 - 25, avg turns: 93
+    ../bots/3/MyBot: 80 - 0 - 20, avg turns: 97
+    example_bots/DualBot.jar: 98 - 0 - 2, avg turns: 107
+    example_bots/RageBot.jar: 98 - 0 - 2, avg turns: 61
+    totals: 583 - 6 - 311
+
