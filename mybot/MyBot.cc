@@ -414,9 +414,10 @@ void DoTurn() {
   vector<Planet> myPlanets = planetWars.MyPlanets();
   for (vector<Planet>::iterator it = myPlanets.begin(); it != myPlanets.end();
       ++it) {
+    bool attacked = false;
     do {
-      findAndEngageTarget(pw, *it);
-    } while (0);
+      attacked = findAndEngageTarget(pw, *it);
+    } while (planetWarsTurn == 2 && attacked);
   }
 }
 
