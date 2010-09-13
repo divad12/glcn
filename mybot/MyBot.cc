@@ -40,6 +40,15 @@ struct compareFleets {
   }
 };
 
+// A future planet. only a few properties will change. the id is stored as the
+// index of this planet within its data structure
+struct FuturePlanet {
+  int owner;
+  int numShips;
+  FuturePlanet(int Owner, int NumShips) : owner(Owner), numShips(NumShips) {}
+  FuturePlanet() : owner(-1), numShips(-1) {}
+};
+
 // Should actually be multiset<const Fleet&, ... (or even <Fleet&), but got compile errors. why?
 typedef multiset<Fleet*, compareFleets> IncomingFleets;
 
@@ -58,10 +67,10 @@ class PwState {
   int NumPlanets;
   // Adjusted planet ships size taking into account incoming fleets. Negatives
   // indicate me owning it.
-  vector <int> planetsAdjusted;
+  vector <FuturePlanet> planetsAdjusted;
   vector <IncomingFleets> fleetsToPlanet;
   vector <int> shipsLeaving;
-  int adjustPlanetShips(const IncomingFleets&, const Planet&);
+  FuturePlanet adjustPlanetShips(const IncomingFleets&, const Planet&);
  private:
   void factorInAllFleets();
 };
@@ -80,17 +89,20 @@ void outputPlanet(const Planet& p) {
       p.NumShips() << " GRate=" << p.GrowthRate() << endl);
 }
 
-void outputIntVector(vector<int> v, bool printIndices=false) {
+void printIndices(int size) {
   if (!debugMode) {
     return;
   }
 
-  if (printIndices) {
-    // print indices (should line up with values)
-    for (int i = 0; i < v.size(); ++i) {
-      debug ( setw(4) << left << i);
-    }
-    debug (" <-- indices" << endl);
+  for (int i = 0; i < size; ++i) {
+    debug ( setw(4) << left << i);
+  }
+  debug (" <-- indices" << endl);
+}
+
+void outputIntVector(vector<int> v) {
+  if (!debugMode) {
+    return;
   }
 
   // print values
@@ -99,6 +111,26 @@ void outputIntVector(vector<int> v, bool printIndices=false) {
   }
   debug ( endl);
 }
+
+void outputFuturePlanets(vector <FuturePlanet> v) {
+  if (!debugMode) {
+    return;
+  }
+  int size = v.size();
+  printIndices(size);
+
+  for (int i = 0; i < v.size(); ++i) {
+    debug(setw(4) << v[i].numShips);
+  }
+
+  debug(" <-- #ships " << endl);
+
+  for (int i = 0; i < v.size(); ++i) {
+    debug(setw(4) << v[i].owner);
+  }
+  debug(" <-- owner" << endl);
+}
+
 
 //------------------------------------------------------------------------------
 // CLASS METHODS
@@ -126,15 +158,14 @@ void PwState::factorInAllFleets() {
   // Now calculate adjusted num ships for each planet
   for (vector<Planet>::iterator it = Planets.begin(); it != Planets.end();
       ++it) {
-    debug(setw(4) << left << it->NumShips());
     int pid = it->PlanetID();
+    debug(setw(4) << left << it->NumShips());
     planetsAdjusted[pid] = adjustPlanetShips(fleetsToPlanet[pid], *it);
   }
 
   debug(" <-- #ships currently" << endl);
-  outputIntVector(planetsAdjusted, true);
+  outputFuturePlanets(planetsAdjusted);
 }
-
 
 //------------------------------------------------------------------------------
 // Game Functions
@@ -175,7 +206,7 @@ int* resolveBattle(int& a, int& b, int& c, int* oldVictor) {
 // @param fleets fleets going into the planet
 // @param planet the planet of concern
 // @return number of ships left on planet at the end of it all. positive means ops/neutrals, negative means me
-int PwState::adjustPlanetShips(const IncomingFleets& fleets,
+FuturePlanet PwState::adjustPlanetShips(const IncomingFleets& fleets,
     const Planet& planet) {
   // THIS is actually horribly named. prevFleet should be current fleet, and
   // local variable f should be future fleet
@@ -216,7 +247,11 @@ int PwState::adjustPlanetShips(const IncomingFleets& fleets,
 
   // XXX HACK: so that we can give socres when planet is empty but still owned
   *planetOwner = max(1, *planetOwner);
-  return planetOwner == &mes ? -(*planetOwner) : *planetOwner;
+
+  // Now construct a FuturePlanet object representing this planet in the future
+  int ownerId = (planetOwner == &neutrals ? 0 : (planetOwner == &mes ? 1 : 2));
+  int numShips = (ownerId == 1 ? -(*planetOwner) : *planetOwner);
+  return FuturePlanet(ownerId, numShips);
 }
 
 void issueOrder(PwState& pw, int source, int target, int numShips) {
@@ -249,13 +284,13 @@ double scorePlanet(const PwState& pw, const Planet& source, const Planet&
   int targetId = target.PlanetID();
 
   // If the planet already (or will) belong to us, don't consider reinforcing it
-  // TODO: experiment with changing the '0' constant to, say, -20
-  if (pw.planetsAdjusted[targetId] < 0) {
-    return pw.planetsAdjusted[targetId];
+  // TODO: experiment with changing the '0' numShips constant to, say, -20
+  if (pw.planetsAdjusted[targetId].owner == 1) {
+    return pw.planetsAdjusted[targetId].numShips;
   }
 
   double numerator = target.GrowthRate();// * target.GrowthRate();
-  double denominator = pw.planetsAdjusted[targetId]
+  double denominator = pw.planetsAdjusted[targetId].numShips
       + gPlanetWars->Distance(source.PlanetID(), targetId);
   // TODO epsilon comparison
   denominator = denominator == 0 ? 1.0 : denominator;
@@ -296,7 +331,7 @@ bool findAndEngageTarget(PwState& pw, const Planet& source) {
 
   int targetId = findTarget(pw, source);
   const Planet& target = gPlanetWars->GetPlanet(targetId);
-  if (targetId < 0) {
+  if (targetId < 0 || targetId == sourceId) {
     return false;
   }
 
@@ -306,9 +341,15 @@ bool findAndEngageTarget(PwState& pw, const Planet& source) {
   // - why 1/2? have a smarter default
   int halfForce = (source.NumShips() - pw.shipsLeaving[sourceId]) / 2;
   int numAttackingShips;
-  if (target.Owner() == 0) {
-    numAttackingShips = min(pw.planetsAdjusted[targetId] + 1, halfForce);
+  int futureOwner = target.Owner(); //pw.planetsAdjusted[targetId].owner;
+  int futureNumShips = pw.planetsAdjusted[targetId].numShips;
+  if (futureOwner == 0) {
+    numAttackingShips = min(futureNumShips + 1, halfForce);
+  } else if (futureOwner == 1) {
+    numAttackingShips = halfForce;
   } else {
+    // This hsould be a lot more sophisticated. for example, find (last enemey fleet's remaining turns - my distance)*growth rate
+    //numAttackingShips = min(futureNumShips + gPlanetWars->Distance(sourceId, targetId) * target.GrowthRate() + 1, halfForce);
     numAttackingShips = halfForce;
   }
 
@@ -318,7 +359,7 @@ bool findAndEngageTarget(PwState& pw, const Planet& source) {
 
   // If after sending out this fleet, we lose this planet, don't attack!
   // TODO: this could be a little more sophisticated/generalized
-  if (pw.planetsAdjusted[sourceId] + numAttackingShips >= 0) {
+  if (pw.planetsAdjusted[sourceId].numShips + numAttackingShips >= 0) {
     return false;
   }
 
