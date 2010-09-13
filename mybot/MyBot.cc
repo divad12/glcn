@@ -341,7 +341,7 @@ bool findAndEngageTarget(PwState& pw, const Planet& source) {
   // - why 1/2? have a smarter default
   int halfForce = (source.NumShips() - pw.shipsLeaving[sourceId]) / 2;
   int numAttackingShips;
-  int futureOwner = target.Owner(); //pw.planetsAdjusted[targetId].owner;
+  int futureOwner = pw.planetsAdjusted[targetId].owner;
   int futureNumShips = pw.planetsAdjusted[targetId].numShips;
   if (futureOwner == 0) {
     numAttackingShips = min(futureNumShips + 1, halfForce);
