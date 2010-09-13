@@ -405,7 +405,7 @@ void DoTurn() {
   // not. Vary this according to our sjjtrength and turn #. Also consider
   // sending out simultaneous fleets at the beginning.
   if (pw.MyFleetsSize >= pw.MyPlanetsSize * 2 && planetWarsTurn > 10) {
-    return;
+    //return;
   }
 
   // Attack! Each planet makes its own decision.
