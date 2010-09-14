@@ -146,3 +146,46 @@ Sat Sep 11 23:05:08 EDT 2010
     example_bots/RageBot.jar: 98 - 0 - 2, avg turns: 61
     totals: 583 - 6 - 311
 
+Sun Sep 12 23:51:16 EDT 2010
+../bots/7/MyBot vs
+    ../bots/7-frugally-take-future-ops/MyBot: 43 - 7 - 50, avg turns: 99
+    ../bots/7-only-frugal-future-neutrals/MyBot: 42 - 6 - 52, avg turns: 103
+    ../bots/7-spread-second-turn/MyBot: 4 - 93 - 3, avg turns: 313
+    ../bots/7-unlimited-fleets/MyBot: 25 - 5 - 70, avg turns: 111
+    totals: 114 - 111 - 175
+../bots/7-frugally-take-future-ops/MyBot vs
+    ../bots/7-only-frugal-future-neutrals/MyBot: 30 - 29 - 41, avg turns: 178
+    ../bots/7-spread-second-turn/MyBot: 51 - 7 - 42, avg turns: 93
+    ../bots/7-unlimited-fleets/MyBot: 41 - 2 - 57, avg turns: 90
+    ../bots/6/MyBot: 66 - 4 - 30, avg turns: 92
+    ../bots/5-skip-first-turn/MyBot: 66 - 0 - 34, avg turns: 101
+    ../bots/5-unlimited-fleets/MyBot: 69 - 4 - 27, avg turns: 110
+    example_bots/DualBot.jar: 96 - 0 - 4, avg turns: 106
+    example_bots/RageBot.jar: 99 - 0 - 1, avg turns: 44
+    totals: 518 - 46 - 236
+../bots/7-only-frugal-future-neutrals/MyBot vs
+    ../bots/7-spread-second-turn/MyBot: 54 - 6 - 40, avg turns: 95
+    ../bots/7-unlimited-fleets/MyBot: 48 - 1 - 51, avg turns: 94
+    ../bots/6/MyBot: 69 - 4 - 27, avg turns: 96
+    ../bots/5-skip-first-turn/MyBot: 65 - 0 - 35, avg turns: 102
+    ../bots/5-unlimited-fleets/MyBot: 65 - 4 - 31, avg turns: 108
+    example_bots/DualBot.jar: 96 - 0 - 4, avg turns: 106
+    example_bots/RageBot.jar: 99 - 0 - 1, avg turns: 44
+    totals: 496 - 15 - 189
+../bots/7-spread-second-turn/MyBot vs
+    ../bots/7-unlimited-fleets/MyBot: 25 - 5 - 70, avg turns: 111
+    ../bots/6/MyBot: 62 - 1 - 37, avg turns: 92
+    ../bots/5-skip-first-turn/MyBot: 57 - 0 - 43, avg turns: 93
+    ../bots/5-unlimited-fleets/MyBot: 53 - 2 - 45, avg turns: 93
+    example_bots/DualBot.jar: 97 - 0 - 3, avg turns: 103
+Mon Sep 13 18:25:05 EDT 2010
+../bots/8/MyBot vs
+    ../bots/7/MyBot: 71 - 5 - 24, avg turns: 106
+    ../bots/7-frugally-take-future-ops/MyBot: 57 - 2 - 41, avg turns: 99
+    ../bots/7-only-frugal-future-neutrals/MyBot: 50 - 1 - 49, avg turns: 98
+    ../bots/7-spread-second-turn/MyBot: 71 - 5 - 24, avg turns: 106
+    ../bots/7-unlimited-fleets/MyBot: 2 - 94 - 4, avg turns: 142
+    example_bots/DualBot.jar: 98 - 0 - 2, avg turns: 106
+    example_bots/RageBot.jar: 99 - 0 - 1, avg turns: 43
+    totals: 448 - 107 - 145
+
